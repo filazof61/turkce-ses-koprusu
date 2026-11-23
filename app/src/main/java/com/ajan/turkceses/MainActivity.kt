@@ -5,17 +5,18 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Color
 import android.os.Bundle
 import android.speech.RecognitionListener
 import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
+import android.view.Gravity
 import android.widget.Button
+import android.widget.LinearLayout
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import java.util.Locale
 
 class MainActivity : AppCompatActivity() {
     private var recognizer: SpeechRecognizer? = null
@@ -24,18 +25,39 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-        txt = findViewById(R.id.txtResult)
-        val btn = findViewById<Button>(R.id.btnListen)
-        btn.text = "OTOMATIK DINLIYOR - KONUŞ"
-        // Izin iste
+        val lay = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            gravity = Gravity.CENTER_HORIZONTAL
+            setPadding(40, 80, 40, 40)
+            setBackgroundColor(Color.WHITE)
+        }
+        val title = TextView(this).apply {
+            text = "AJAN - TURKCE SES KOPRUSU\nDil: Turkce (Turkiye) - tr-TR"
+            textSize = 18f
+            gravity = Gravity.CENTER
+            setPadding(0, 0, 0, 40)
+        }
+        txt = TextView(this).apply {
+            text = "Baslatiliyor..."
+            textSize = 20f
+            gravity = Gravity.CENTER
+            setPadding(0, 40, 0, 40)
+        }
+        val btn = Button(this).apply {
+            text = "OTOMATIK DINLIYOR - KONUS"
+            textSize = 18f
+            setOnClickListener { dinlemeyiBaslat() }
+        }
+        lay.addView(title)
+        lay.addView(btn)
+        lay.addView(txt)
+        setContentView(lay)
+
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.RECORD_AUDIO), 1)
         } else {
             dinlemeyiBaslat()
         }
-        // Buton da yedekte dursun
-        btn.setOnClickListener { dinlemeyiBaslat() }
     }
 
     override fun onRequestPermissionsResult(rc: Int, perms: Array<String>, res: IntArray) {
@@ -45,14 +67,13 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        // Güç tuşu çift bas -> uygulama ön plana gelince tekrar dinle
         if (!dinliyor) dinlemeyiBaslat()
     }
 
     private fun dinlemeyiBaslat() {
         if (dinliyor) return
         if (!SpeechRecognizer.isRecognitionAvailable(this)) {
-            txt.text = "Ses tanıma yok"
+            txt.text = "Ses tanima yok"
             return
         }
         recognizer = SpeechRecognizer.createSpeechRecognizer(this)
@@ -65,14 +86,13 @@ class MainActivity : AppCompatActivity() {
             putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 1)
         }
         recognizer?.setRecognitionListener(object : RecognitionListener {
-            override fun onReadyForSpeech(p: Bundle?) { dinliyor = true; txt.text = "Dinliyorum... konuş kanka" }
+            override fun onReadyForSpeech(p: Bundle?) { dinliyor = true; txt.text = "Dinliyorum... konus kanka" }
             override fun onBeginningOfSpeech() {}
             override fun onRmsChanged(v: Float) {}
             override fun onBufferReceived(b: ByteArray?) {}
             override fun onEndOfSpeech() {}
             override fun onError(e: Int) {
                 dinliyor = false
-                // Hata olsa bile 500ms sonra tekrar dinle - sürekli dinleme
                 txt.postDelayed({ dinlemeyiBaslat() }, 500)
             }
             override fun onResults(r: Bundle?) {
@@ -81,11 +101,9 @@ class MainActivity : AppCompatActivity() {
                 val metin = list?.firstOrNull() ?: ""
                 if (metin.isNotEmpty()) {
                     txt.text = metin
-                    // Panoya kopyala - Termux ajanı okuyacak
                     val cm = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                     cm.setPrimaryClip(android.content.ClipData.newPlainText("ajan", metin))
                 }
-                // Hemen tekrar dinle - butonsuz sürekli
                 txt.postDelayed({ dinlemeyiBaslat() }, 300)
             }
             override fun onPartialResults(r: Bundle?) {
