@@ -85,3 +85,39 @@ class MainActivity : Activity() {
         }
         recognizer?.setRecognitionListener(object : RecognitionListener {
             override fun onReadyForSpeech(p: Bundle?)
+            {
+                dinliyor = true
+                txt.text = "Dinliyorum... konus kanka"
+            }
+            override fun onBeginningOfSpeech() {}
+            override fun onRmsChanged(v: Float) {}
+            override fun onBufferReceived(b: ByteArray?) {}
+            override fun onEndOfSpeech() {}
+            override fun onError(e: Int) {
+                dinliyor = false
+                txt.postDelayed({ dinlemeyiBaslat() }, 500)
+            }
+            override fun onResults(r: Bundle?) {
+                dinliyor = false
+                val list = r?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
+                val metin = list?.firstOrNull() ?: ""
+                if (metin.isNotEmpty()) {
+                    txt.text = metin
+                    val cm = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                    cm.setPrimaryClip(android.content.ClipData.newPlainText("ajan", metin))
+                }
+                txt.postDelayed({ dinlemeyiBaslat() }, 300)
+            }
+            override fun onPartialResults(r: Bundle?) {
+                val list = r?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
+                if (!list.isNullOrEmpty()) txt.text = list[0]
+            }
+            override fun onEvent(a: Int, b: Bundle?) {}
+        })
+        recognizer?.startListening(intent)
+    }
+    override fun onDestroy() {
+        super.onDestroy()
+        recognizer?.destroy()
+    }
+}
