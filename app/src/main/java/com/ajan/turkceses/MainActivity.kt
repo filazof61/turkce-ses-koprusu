@@ -85,6 +85,7 @@ class MainActivity : Activity() {
 
     override fun onResume() {
         super.onResume()
+        if (!dinliyor) dinlemeyiBaslat()
     }
 
     private fun dinlemeyiBaslat() {
