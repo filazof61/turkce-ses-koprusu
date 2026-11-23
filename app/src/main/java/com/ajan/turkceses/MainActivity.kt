@@ -57,10 +57,10 @@ class MainActivity : Activity() {
                 prefs.edit().putBoolean("sesle_uyan", acik).apply()
                 text = if (acik) "Sesle Uyanma: AÇIK - Hey Filazof dinliyor" else "Sesle Uyanma: KAPALI - Çift bas ile aç"
                 if (acik) {
-                    try { startForegroundService(Intent(this@MainActivity, WakeService::class.java)) } catch (e: Exception) {}
+                    txt.text = "Sesle uyanma şimdilik kapalı, çift bas ile çalışıyor"
                     txt.text = "Sesle uyanma açıldı, Hey Filazof de kanka"
                 } else {
-                    try { stopService(Intent(this@MainActivity, WakeService::class.java)) } catch (e: Exception) {}
+                    
                     txt.text = "Sesle uyanma kapalı, çift bas ile açılır"
                 }
             }
