@@ -127,6 +127,44 @@ class MainActivity : Activity() {
             startActivity(i)
         } catch (e: Exception) {}
     }
+    private fun ismeGoreAc(isim: String) {
+        try {
+            val pm = packageManager
+            val apps = pm.getInstalledApplications(0)
+            for (a in apps) {
+                val ad = pm.getApplicationLabel(a).toString().lowercase()
+                if (ad.contains(isim.lowercase())) {
+                    val i = pm.getLaunchIntentForPackage(a.packageName)
+                    if (i != null) { startActivity(i); return }
+                }
+            }
+            txt.text = "Bulamadim kanka: " + isim
+        } catch (e: Exception) {}
+    }
+    private fun takvimeNotEkle(baslik: String) {
+        try {
+            val i = Intent(Intent.ACTION_INSERT).apply {
+                data = android.provider.CalendarContract.Events.CONTENT_URI
+                putExtra(android.provider.CalendarContract.Events.TITLE, baslik)
+            }
+            startActivity(i)
+        } catch (e: Exception) {}
+    }
+    private fun alarmKur(saat: Int, dakika: Int, mesaj: String) {
+        try {
+            val i = Intent(android.provider.AlarmClock.ACTION_SET_ALARM).apply {
+                putExtra(android.provider.AlarmClock.EXTRA_HOUR, saat)
+                putExtra(android.provider.AlarmClock.EXTRA_MINUTES, dakika)
+                putExtra(android.provider.AlarmClock.EXTRA_MESSAGE, mesaj)
+            }
+            startActivity(i)
+        } catch (e: Exception) {}
+    }
+    private fun sesKaydiAc() {
+        ismeGoreAc("Ses Kaydedici")
+        ismeGoreAc("Ses Kaydi")
+        ismeGoreAc("Recorder")
+    }
     override fun onDestroy() {
         super.onDestroy()
         recognizer?.destroy()
