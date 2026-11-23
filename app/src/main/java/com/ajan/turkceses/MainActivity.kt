@@ -42,7 +42,7 @@ class MainActivity : Activity() {
             setPadding(0, 40, 0, 40)
         }
         val btn = Button(this).apply {
-            text = "OTOMATIK DINLIYOR - KONUS"
+            text = "TEKRAR DINLE"
             textSize = 18f
             setOnClickListener { dinlemeyiBaslat() }
         }
@@ -65,7 +65,6 @@ class MainActivity : Activity() {
 
     override fun onResume() {
         super.onResume()
-        if (!dinliyor) dinlemeyiBaslat()
     }
 
     private fun dinlemeyiBaslat() {
@@ -95,7 +94,7 @@ class MainActivity : Activity() {
             override fun onEndOfSpeech() {}
             override fun onError(e: Int) {
                 dinliyor = false
-                txt.postDelayed({ dinlemeyiBaslat() }, 500)
+                txt.text = "Dinleme bitti, tekrar için butona bas"
             }
             override fun onResults(r: Bundle?) {
                 dinliyor = false
@@ -106,7 +105,7 @@ class MainActivity : Activity() {
                     val cm = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                     cm.setPrimaryClip(android.content.ClipData.newPlainText("ajan", metin))
                 }
-                txt.postDelayed({ dinlemeyiBaslat() }, 300)
+                txt.text = txt.text.toString() + "\n(Tekrar için butona bas)"
             }
             override fun onPartialResults(r: Bundle?) {
                 val list = r?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
