@@ -115,6 +115,18 @@ class MainActivity : Activity() {
         })
         recognizer?.startListening(intent)
     }
+    private fun uygulamayiAc(paket: String) {
+        try {
+            val i = packageManager.getLaunchIntentForPackage(paket)
+            if (i != null) startActivity(i) else txt.text = "Uygulama bulunamadi: " + paket
+        } catch (e: Exception) { txt.text = "Acilamadi kanka" }
+    }
+    private fun googleArat(sorgu: String) {
+        try {
+            val i = Intent(Intent.ACTION_VIEW, android.net.Uri.parse("https://www.google.com/search?q=" + java.net.URLEncoder.encode(sorgu, "UTF-8")))
+            startActivity(i)
+        } catch (e: Exception) {}
+    }
     override fun onDestroy() {
         super.onDestroy()
         recognizer?.destroy()
