@@ -46,6 +46,26 @@ class MainActivity : Activity() {
             textSize = 18f
             setOnClickListener { dinlemeyiBaslat() }
         }
+        val prefs = getSharedPreferences("ajan", MODE_PRIVATE)
+        var sesleUyan = prefs.getBoolean("sesle_uyan", false)
+        val sw = android.widget.Switch(this).apply {
+            text = if (sesleUyan) "Sesle Uyanma: AÇIK - Hey Filazof dinliyor" else "Sesle Uyanma: KAPALI - Çift bas ile aç"
+            isChecked = sesleUyan
+            textSize = 16f
+            setPadding(0, 20, 0, 20)
+            setOnCheckedChangeListener { _, acik ->
+                prefs.edit().putBoolean("sesle_uyan", acik).apply()
+                text = if (acik) "Sesle Uyanma: AÇIK - Hey Filazof dinliyor" else "Sesle Uyanma: KAPALI - Çift bas ile aç"
+                if (acik) {
+                    try { startForegroundService(Intent(this@MainActivity, WakeService::class.java)) } catch (e: Exception) {}
+                    txt.text = "Sesle uyanma açıldı, Hey Filazof de kanka"
+                } else {
+                    try { stopService(Intent(this@MainActivity, WakeService::class.java)) } catch (e: Exception) {}
+                    txt.text = "Sesle uyanma kapalı, çift bas ile açılır"
+                }
+            }
+        }
+        lay.addView(sw)
         lay.addView(title)
         lay.addView(btn)
         lay.addView(txt)
