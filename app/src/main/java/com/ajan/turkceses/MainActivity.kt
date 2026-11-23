@@ -1,6 +1,7 @@
 package com.ajan.turkceses
 
 import android.Manifest
+import android.app.Activity
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
@@ -14,11 +15,8 @@ import android.view.Gravity
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
-import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : Activity() {
     private var recognizer: SpeechRecognizer? = null
     private lateinit var txt: TextView
     private var dinliyor = false
@@ -32,7 +30,7 @@ class MainActivity : AppCompatActivity() {
             setBackgroundColor(Color.WHITE)
         }
         val title = TextView(this).apply {
-            text = "AJAN - TURKCE SES KOPRUSU\nDil: Turkce (Turkiye) - tr-TR"
+            text = "AJAN - TURKCE SES KOPRUSU\nDil: Turkce - tr-TR"
             textSize = 18f
             gravity = Gravity.CENTER
             setPadding(0, 0, 0, 40)
@@ -53,8 +51,8 @@ class MainActivity : AppCompatActivity() {
         lay.addView(txt)
         setContentView(lay)
 
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.RECORD_AUDIO), 1)
+        if (checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(arrayOf(Manifest.permission.RECORD_AUDIO), 1)
         } else {
             dinlemeyiBaslat()
         }
@@ -86,37 +84,4 @@ class MainActivity : AppCompatActivity() {
             putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 1)
         }
         recognizer?.setRecognitionListener(object : RecognitionListener {
-            override fun onReadyForSpeech(p: Bundle?) { dinliyor = true; txt.text = "Dinliyorum... konus kanka" }
-            override fun onBeginningOfSpeech() {}
-            override fun onRmsChanged(v: Float) {}
-            override fun onBufferReceived(b: ByteArray?) {}
-            override fun onEndOfSpeech() {}
-            override fun onError(e: Int) {
-                dinliyor = false
-                txt.postDelayed({ dinlemeyiBaslat() }, 500)
-            }
-            override fun onResults(r: Bundle?) {
-                dinliyor = false
-                val list = r?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
-                val metin = list?.firstOrNull() ?: ""
-                if (metin.isNotEmpty()) {
-                    txt.text = metin
-                    val cm = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                    cm.setPrimaryClip(android.content.ClipData.newPlainText("ajan", metin))
-                }
-                txt.postDelayed({ dinlemeyiBaslat() }, 300)
-            }
-            override fun onPartialResults(r: Bundle?) {
-                val list = r?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
-                if (!list.isNullOrEmpty()) txt.text = list[0]
-            }
-            override fun onEvent(a: Int, b: Bundle?) {}
-        })
-        recognizer?.startListening(intent)
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        recognizer?.destroy()
-    }
-}
+            override fun onReadyForSpeech(p: Bundle?)
